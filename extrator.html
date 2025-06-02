@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Extrator NFe</title>
+<meta charset="UTF-8">
+<style>
+body{font-family:Arial;background:#f0f0f0;margin:0;padding:20px}
+.container{max-width:900px;margin:0 auto;background:white;padding:20px;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.1)}
+.header{background:#3498db;color:white;padding:20px;text-align:center;border-radius:8px;margin-bottom:20px}
+.upload{border:2px dashed #ccc;padding:30px;text-align:center;margin:20px 0;border-radius:8px}
+.btn{padding:12px 20px;margin:5px;border:none;border-radius:5px;cursor:pointer;font-weight:bold}
+.btn-blue{background:#3498db;color:white}
+.btn-green{background:#27ae60;color:white}
+.btn-red{background:#e74c3c;color:white}
+.btn:disabled{background:#ccc;cursor:not-allowed}
+.status{padding:15px;margin:15px 0;border-radius:5px;font-weight:bold}
+.info{background:#d1ecf1;color:#0c5460}
+.success{background:#d4edda;color:#155724}
+.error{background:#f8d7da;color:#721c24}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #ddd;padding:10px;text-align:left}
+th{background:#34495e;color:white}
+.highlight{background:#3498db !important;font-weight:bold}
+tr:nth-child(even){background:#f9f9f9}
+.hide{display:none}
+.valor{text-align:right;font-family:monospace;font-weight:bold}
+.destaque{background:#fff3cd;color:#856404;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>🧾 Extrator NFe</h1>
+<p>Extração de Produtos XML</p>
+</div>
+<div class="upload">
+<h3>📁 Selecione o arquivo XML</h3>
+<input type="file" id="arquivo" accept=".xml" style="display:none">
+<button class="btn btn-blue" onclick="selecionarArquivo()">Escolher XML</button>
+<div id="info-arquivo" style="margin-top:10px;color:green;font-weight:bold"></div>
+</div>
+<div style="text-align:center">
+<button class="btn btn-green" id="processar" onclick="processar()" disabled>🔄 Processar</button>
+<button class="btn btn-red" id="exportar" onclick="exportar()" disabled>💾 Exportar CSV</button>
+</div>
+<div id="status" class="status info">Aguardando arquivo XML...</div>
+<div id="resultados" class="hide">
+<h3>📊 Produtos encontrados: <span id="total">0</span></h3>
+<table>
+<tr>
+<th>Código</th>
+<th>Descrição</th>
+<th>Quantidade</th>
+<th class="highlight">Valor Unit. c/ Impostos ⭐</th>
+<th>Valor Total</th>
+</tr>
+<tbody id="tabela"></tbody>
+</table>
+</div>
+</div>
+<script>
+let produtos=[];let arquivo=null;
+function selecionarArquivo(){document.getElementById('arquivo').click()}
+document.getElementById('arquivo').onchange=function(e){arquivo=e.target.files[0];if(arquivo){document.getElementById('info-arquivo').textContent='✅ '+arquivo.name;document.getElementById('processar').disabled=false;mostrarStatus('Arquivo selecionado!','info')}};
+function processar(){if(!arquivo)return;mostrarStatus('🔄 Processando...','info');const leitor=new FileReader();leitor.onload=function(e){try{const xml=e.target.result;const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');produtos=[];const itens=doc.querySelectorAll('det');itens.forEach(function(item){const prod=item.querySelector('prod');if(prod){const codigo=getText(prod,'cProd')||'N/A';const descricao=getText(prod,'xProd')||'N/A';const quantidade=parseFloat(getText(prod,'qCom')||'0');const valorUnit=parseFloat(getText(prod,'vUnCom')||'0');const valorTotal=parseFloat(getText(prod,'vProd')||'0');let impostos=0;const imposto=item.querySelector('imposto');if(imposto){const icms=imposto.querySelector('vICMS');const ipi=imposto.querySelector('vIPI');const pis=imposto.querySelector('vPIS');const cofins=imposto.querySelector('vCOFINS');if(icms)impostos+=parseFloat(icms.textContent||'0');if(ipi)impostos+=parseFloat(ipi.textContent||'0');if(pis)impostos+=parseFloat(pis.textContent||'0');if(cofins)impostos+=parseFloat(cofins.textContent||'0')}const produto={codigo:codigo,descricao:descricao,quantidade:quantidade,valorUnitario:valorUnit+(quantidade>0?impostos/quantidade:0),valorTotalFinal:valorTotal+impostos};produtos.push(produto)}});mostrarResultados();mostrarStatus('✅ '+produtos.length+' produtos extraídos!','success')}catch(erro){mostrarStatus('❌ Erro: '+erro.message,'error')}};leitor.readAsText(arquivo)}
+function getText(parent,tag){const el=parent.querySelector(tag);return el?el.textContent:''}
+function mostrarResultados(){const tabela=document.getElementById('tabela');tabela.innerHTML='';produtos.forEach(function(p){const linha=tabela.insertRow();linha.innerHTML='<td><strong>'+p.codigo+'</strong></td><td>'+p.descricao+'</td><td class="valor">'+p.quantidade.toFixed(2)+'</td><td class="valor destaque">R$ '+p.valorUnitario.toFixed(2)+'</td><td class="valor">R$ '+p.valorTotalFinal.toFixed(2)+'</td>'});document.getElementById('total').textContent=produtos.length;document.getElementById('resultados').classList.remove('hide');document.getElementById('exportar').disabled=false}
+function exportar(){let csv='Código,Descrição,Quantidade,Valor Unitário COM Impostos,Valor Total\n';produtos.forEach(function(p){csv+='"'+p.codigo+'","'+p.descricao+'",'+p.quantidade.toFixed(2)+','+p.valorUnitario.toFixed(2)+','+p.valorTotalFinal.toFixed(2)+'\n'});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='produtos_nfe.csv';a.click();URL.revokeObjectURL(url);mostrarStatus('✅ CSV exportado!','success')}
+function mostrarStatus(msg,tipo){const status=document.getElementById('status');status.textContent=msg;status.className='status '+tipo}
+</script>
+</body>
+</html>

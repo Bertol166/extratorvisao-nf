@@ -2,439 +2,717 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>VisualExtractor NFe - Versão Completa PRO</title>
+<title>VisualExtractor NFe - Premium</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+:root {
+    --cor-primaria: #3498db;
+    --cor-secundaria: #2ecc71;
+    --cor-erro: #e74c3c;
+    --cor-sucesso: #27ae60;
+    --cor-fundo: #ecf0f1;
+}
+.tema-escuro {
+    --cor-primaria: #2980b9;
+    --cor-secundaria: #27ae60;
+    --cor-fundo: #2c3e50;
+    --cor-texto: #ecf0f1;
+}
+.tema-azul {
+    --cor-primaria: #1e3a8a;
+    --cor-secundaria: #3b82f6;
+}
+.tema-verde {
+    --cor-primaria: #065f46;
+    --cor-secundaria: #10b981;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--cor-fundo), #ffffff);
+    padding: 20px;
+    margin: 0;
+    color: var(--cor-texto, #2c3e50);
+    transition: all 0.3s ease;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.header {
+    background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria));
+    color: white;
+    padding: 30px;
+    text-align: center;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+.controles {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.seletor-tema, .filtros {
+    padding: 10px;
+    border: 2px solid var(--cor-primaria);
+    border-radius: 8px;
+    background: white;
+}
+.upload-area {
+    border: 3px dashed var(--cor-primaria);
+    padding: 40px;
+    text-align: center;
+    margin: 30px 0;
+    border-radius: 15px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+.upload-area:hover {
+    background: #e3f2fd;
+    transform: translateY(-2px);
+}
+.upload-area.dragover {
+    border-color: var(--cor-secundaria);
+    background: #e8f5e8;
+}
+.botoes {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+}
+.btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.btn-primario {
+    background: linear-gradient(135deg, var(--cor-secundaria), #229954);
+    color: white;
+}
+.btn-secundario {
+    background: linear-gradient(135deg, var(--cor-primaria), #2980b9);
+    color: white;
+}
+.btn-export {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+.btn-danger {
+    background: linear-gradient(135deg, var(--cor-erro), #c0392b);
+    color: white;
+}
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    border-top: 4px solid var(--cor-primaria);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+.card-valor {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--cor-primaria);
+    margin: 10px 0;
+}
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.tabela th {
+    background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria));
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+}
+.tabela td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+.tabela tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+.tabela tbody tr:hover {
+    background: #e3f2fd;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+.status {
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    font-weight: bold;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+.status.sucesso {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.status.erro {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.status.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cor-primaria), var(--cor-secundaria));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.detalhes-nfe {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    border-left: 5px solid var(--cor-primaria);
+}
+.graficos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+.grafico-container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin: 10px;
+    }
+    .controles {
+        flex-direction: column;
+    }
+    .botoes {
+        flex-direction: column;
+    }
+    .graficos {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 </head>
-<body style="font-family:Arial;margin:0;padding:0">
-<!-- SELETOR DE TEMA -->
-<div id="seletorTema" style="position:fixed;top:20px;right:20px;z-index:1000;background:white;padding:10px;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.2)">
-<label style="font-weight:bold">🎨 Tema:</label>
-<select onchange="alterarTema(this.value)" style="margin-left:10px;padding:5px;border-radius:5px">
-<option value="azul">🔵 Azul Padrão</option>
-<option value="verde">🟢 Verde Empresarial</option>
-<option value="roxo">🟣 Roxo Moderno</option>
-<option value="laranja">🟠 Laranja Vibrante</option>
-<option value="escuro">⚫ Modo Escuro</option>
-</select>
-</div>
-<div id="container" style="max-width:1200px;margin:0 auto;padding:20px;background:var(--bg-color, #e8f4fd);min-height:100vh">
-<h1 id="titulo" style="background:var(--primary-color, linear-gradient(135deg,#3498db,#2980b9));color:white;padding:25px;text-align:center;border-radius:15px;margin-bottom:30px;font-size:2.2em">
-🧾 VisualExtractor NFe - Versão PRO
-</h1>
-<!-- INFORMAÇÕES GERAIS DA NFE -->
-<div id="infoCompleta" style="display:none;margin-bottom:30px;padding:25px;background:white;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1)">
-<h3 style="color:#2c3e50;margin-bottom:25px;font-size:1.5em">📋 Informações Completas da NFe</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:25px">
-<div style="background:#f8f9fa;padding:20px;border-radius:10px">
-<h4 style="color:#27ae60;margin-bottom:15px">🏢 DADOS DO EMISSOR</h4>
-<p><strong>Nome:</strong><br><span id="nomeEmissor" style="font-weight:bold"></span></p>
-<p><strong>CNPJ:</strong><br><span id="cnpjEmissor" style="font-weight:bold;color:#e74c3c"></span></p>
-<p><strong>Endereço:</strong><br><span id="enderecoEmissor"></span></p>
-</div>
-<div style="background:#f8f9fa;padding:20px;border-radius:10px">
-<h4 style="color:#3498db;margin-bottom:15px">🏪 DADOS DO DESTINATÁRIO</h4>
-<p><strong>Nome:</strong><br><span id="nomeDestinatario" style="font-weight:bold"></span></p>
-<p><strong>CNPJ/CPF:</strong><br><span id="cnpjDestinatario" style="font-weight:bold;color:#e74c3c"></span></p>
-<p><strong>Endereço:</strong><br><span id="enderecoDestinatario"></span></p>
-</div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:25px">
-<div style="background:#fff3cd;padding:15px;border-radius:10px;text-align:center">
-<p><strong>📅 Data de Emissão</strong><br><span id="dataEmissao" style="font-weight:bold;color:#856404"></span></p>
-</div>
-<div style="background:#d4edda;padding:15px;border-radius:10px;text-align:center">
-<p><strong>🔢 Número da NFe</strong><br><span id="numeroNFe" style="font-weight:bold;color:#155724;font-size:1.2em"></span></p>
-</div>
-<div style="background:#cce5ff;padding:15px;border-radius:10px;text-align:center">
-<p><strong>🔑 Série</strong><br><span id="serieNFe" style="font-weight:bold;color:#004085"></span></p>
-</div>
-</div>
-<div style="background:#f1f3f4;padding:20px;border-radius:10px;margin-bottom:20px">
-<h4 style="color:#6c757d;margin-bottom:10px">🔢 Chave de Acesso Completa</h4>
-<p id="chaveAcesso" style="font-family:monospace;font-size:1.1em;font-weight:bold;color:#495057;word-break:break-all"></p>
-</div>
-<div style="background:#e7f3ff;padding:20px;border-radius:10px">
-<h4 style="color:#0366d6;margin-bottom:10px">📋 Observações da NFe</h4>
-<p id="observacoes" style="color:#586069;line-height:1.6"></p>
-</div>
-</div>
-<!-- UPLOAD MÚLTIPLO -->
-<div style="border:3px dashed var(--primary-color, #3498db);padding:40px;text-align:center;margin:30px 0;border-radius:15px;background:white">
-<h3 style="color:#2c3e50;margin-bottom:20px">📁 Upload Múltiplo de XMLs da NFe</h3>
-<input type="file" id="xmlFiles" accept=".xml" multiple style="margin-bottom:20px;padding:15px;border:2px solid var(--primary-color, #3498db);border-radius:10px;width:100%;max-width:500px">
-<br>
-<button onclick="processarMultiplosXML()" style="padding:15px 30px;background:var(--primary-color, linear-gradient(135deg,#27ae60,#229954));color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin:10px">🔄 PROCESSAR XMLs</button>
-<button onclick="limparTudo()" style="padding:15px 30px;background:#e74c3c;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin:10px">🗑️ LIMPAR TUDO</button>
-</div>
-<div id="status" style="padding:20px;margin:20px 0;border-radius:10px;font-weight:bold;background:#d1ecf1;color:#0c5460;text-align:center">🎯 Aguardando arquivos XML das Notas Fiscais…</div>
-<!-- FILTROS -->
-<div id="filtros" style="display:none;background:white;padding:25px;border-radius:15px;margin:20px 0;box-shadow:0 5px 15px rgba(0,0,0,0.1)">
-<h3 style="color:#2c3e50;margin-bottom:20px">🔍 Filtros e Pesquisa</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:15px;margin-bottom:20px">
-<input type="text" id="filtroDescricao" placeholder="🔍 Buscar por descrição…" style="padding:12px;border:2px solid #ddd;border-radius:8px">
-<input type="number" id="filtroValorMin" placeholder="💰 Valor mínimo" step="0.01" style="padding:12px;border:2px solid #ddd;border-radius:8px">
-<input type="number" id="filtroValorMax" placeholder="💰 Valor máximo" step="0.01" style="padding:12px;border:2px solid #ddd;border-radius:8px">
-<select id="filtroNFe" style="padding:12px;border:2px solid #ddd;border-radius:8px">
-<option value="">📋 Todas as NFes</option>
-</select>
-</div>
-<button onclick="aplicarFiltros()" style="padding:12px 25px;background:var(--primary-color, #3498db);color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer">🔍 APLICAR FILTROS</button>
-<button onclick="limparFiltros()" style="padding:12px 25px;background:#6c757d;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-left:10px">🗑️ LIMPAR</button>
-</div>
-<!-- RESUMO E ESTATÍSTICAS -->
-<div id="resumoGeral" style="display:none;margin:30px 0">
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px">
-<div style="background:white;padding:25px;border-radius:15px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.1);border-left:5px solid #3498db">
-<h3 style="font-size:2.5em;color:#3498db;margin-bottom:10px" id="totalNFes">0</h3>
-<p style="color:#7f8c8d;font-weight:bold;font-size:1.1em">📋 NFes Processadas</p>
-</div>
-<div style="background:white;padding:25px;border-radius:15px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.1);border-left:5px solid #27ae60">
-<h3 style="font-size:2.5em;color:#27ae60;margin-bottom:10px" id="totalProdutos">0</h3>
-<p style="color:#7f8c8d;font-weight:bold;font-size:1.1em">📦 Total de Produtos</p>
-</div>
-<div style="background:white;padding:25px;border-radius:15px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.1);border-left:5px solid #e74c3c">
-<h3 style="font-size:2em;color:#e74c3c;margin-bottom:10px" id="valorTotalSemImpostos">R$ 0,00</h3>
-<p style="color:#7f8c8d;font-weight:bold;font-size:1.1em">💰 Valor SEM Impostos</p>
-</div>
-<div style="background:var(--primary-color, #3498db);padding:25px;border-radius:15px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);color:white">
-<h3 style="font-size:2em;margin-bottom:10px" id="valorTotalComImpostos">R$ 0,00</h3>
-<p style="font-weight:bold;font-size:1.1em">💎 Valor COM Impostos</p>
-</div>
-<div style="background:white;padding:25px;border-radius:15px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.1);border-left:5px solid #f39c12">
-<h3 style="font-size:2em;color:#f39c12;margin-bottom:10px" id="totalImpostos">R$ 0,00</h3>
-<p style="color:#7f8c8d;font-weight:bold;font-size:1.1em">🏛️ Total de Impostos</p>
-</div>
-</div>
-<!-- GRÁFICOS -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:30px">
-<div style="background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1)">
-<h4 style="color:#2c3e50;margin-bottom:20px;text-align:center">📊 Valores por NFe</h4>
-<canvas id="graficoNFes" width="400" height="200"></canvas>
-</div>
-<div style="background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1)">
-<h4 style="color:#2c3e50;margin-bottom:20px;text-align:center">🏛️ Distribuição de Impostos</h4>
-<canvas id="graficoImpostos" width="400" height="200"></canvas>
-</div>
-</div>
-</div>
-<!-- BOTÕES DE EXPORT -->
-<div id="botoesExport" style="display:none;text-align:center;margin:30px 0;padding:25px;background:white;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,0.1)">
-<h3 style="color:#2c3e50;margin-bottom:25px">📤 Exportar Dados</h3>
-<button onclick="exportarCSV()" style="padding:15px 25px;background:#28a745;color:white;border:none;border-radius:10px;font-weight:bold;margin:10px;cursor:pointer">📄 CSV</button>
-<button onclick="exportarExcel()" style="padding:15px 25px;background:#1f7a1f;color:white;border:none;border-radius:10px;font-weight:bold;margin:10px;cursor:pointer">📊 EXCEL</button>
-<button onclick="exportarPDF()" style="padding:15px 25px;background:#dc3545;color:white;border:none;border-radius:10px;font-weight:bold;margin:10px;cursor:pointer">📋 PDF</button>
-<button onclick="exportarJSON()" style="padding:15px 25px;background:#6f42c1;color:white;border:none;border-radius:10px;font-weight:bold;margin:10px;cursor:pointer">🗃️ JSON</button>
-</div>
-<!-- TABELA DE PRODUTOS -->
-<div id="resultados" style="display:none">
-<h3 style="color:#2c3e50;margin-bottom:20px;font-size:1.8em">📊 Produtos Extraídos (Filtrados: <span id="produtosFiltrados">0</span>)</h3>
-<div style="overflow-x:auto;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1)">
-<table id="tabelaProdutos" style="width:100%;border-collapse:collapse;background:white;font-size:0.9em">
-<thead>
-<tr style="background:var(--primary-color, linear-gradient(135deg,#34495e,#2c3e50));color:white">
-<th style="padding:15px;text-align:left;position:sticky;top:0">NFe</th>
-<th style="padding:15px;text-align:left;position:sticky;top:0">Código</th>
-<th style="padding:15px;text-align:left;position:sticky;top:0">Descrição</th>
-<th style="padding:15px;text-align:center;position:sticky;top:0">Qtd</th>
-<th style="padding:15px;text-align:right;position:sticky;top:0">Unit. S/ Imp.</th>
-<th style="padding:15px;text-align:right;position:sticky;top:0;background:var(--accent-color, #3498db)">Unit. C/ Imp. ⭐</th>
-<th style="padding:15px;text-align:right;position:sticky;top:0">Total</th>
-<th style="padding:15px;text-align:center;position:sticky;top:0">ICMS</th>
-<th style="padding:15px;text-align:center;position:sticky;top:0">IPI</th>
-<th style="padding:15px;text-align:center;position:sticky;top:0">PIS</th>
-<th style="padding:15px;text-align:center;position:sticky;top:0">COFINS</th>
-</tr>
-</thead>
-<tbody id="corpoTabela"></tbody>
-</table>
-</div>
-</div>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🧾 VisualExtractor NFe Premium</h1>
+        <p>Sistema Completo de Análise de Notas Fiscais</p>
+    </div>
+&lt;!-- CONTROLES --&gt;
+&lt;div class="controles"&gt;
+    &lt;select id="seletorTema" class="seletor-tema" onchange="alterarTema()"&gt;
+        &lt;option value=""&gt;🎨 Tema Padrão&lt;/option&gt;
+        &lt;option value="tema-escuro"&gt;🌙 Tema Escuro&lt;/option&gt;
+        &lt;option value="tema-azul"&gt;🔵 Tema Azul&lt;/option&gt;
+        &lt;option value="tema-verde"&gt;🟢 Tema Verde&lt;/option&gt;
+    &lt;/select&gt;
+
+    &lt;input type="number" id="filtroValorMin" class="filtros" placeholder="💰 Valor mínimo" step="0.01"&gt;
+    &lt;input type="number" id="filtroValorMax" class="filtros" placeholder="💰 Valor máximo" step="0.01"&gt;
+    &lt;input type="text" id="filtroProduto" class="filtros" placeholder="🔍 Filtrar produto"&gt;
+    &lt;button onclick="aplicarFiltros()" class="btn btn-secundario"&gt;🔍 Filtrar&lt;/button&gt;
+    &lt;button onclick="limparFiltros()" class="btn btn-secundario"&gt;🔄 Limpar&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- UPLOAD MÚLTIPLO --&gt;
+&lt;div class="upload-area" id="uploadArea"&gt;
+    &lt;h3&gt;📁 Selecione múltiplos arquivos XML da NFe&lt;/h3&gt;
+    &lt;input type="file" id="xmlFiles" accept=".xml" multiple style="margin: 20px 0; padding: 10px; border: 2px solid var(--cor-primaria); border-radius: 8px;"&gt;
+    &lt;p&gt;📌 Arraste e solte múltiplos arquivos XML aqui ou clique para selecionar&lt;/p&gt;
+
+    &lt;div class="progress-bar" id="progressBar" style="display: none;"&gt;
+        &lt;div class="progress-fill" id="progressFill"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- BOTÕES DE AÇÃO --&gt;
+&lt;div class="botoes"&gt;
+    &lt;button onclick="processarMultiplosXML()" class="btn btn-primario"&gt;🔄 PROCESSAR XMLs&lt;/button&gt;
+    &lt;button onclick="exportarExcel()" id="btnExcel" disabled class="btn btn-export"&gt;📊 EXPORTAR EXCEL&lt;/button&gt;
+    &lt;button onclick="exportarPDF()" id="btnPDF" disabled class="btn btn-export"&gt;📋 EXPORTAR PDF&lt;/button&gt;
+    &lt;button onclick="exportarJSON()" id="btnJSON" disabled class="btn btn-export"&gt;🗃️ EXPORTAR JSON&lt;/button&gt;
+    &lt;button onclick="limparTudo()" class="btn btn-danger"&gt;🗑️ LIMPAR TUDO&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="status" class="status info"&gt;🎯 Aguardando arquivos XML das Notas Fiscais...&lt;/div&gt;
+
+&lt;!-- CARDS RESUMO --&gt;
+&lt;div id="cards" class="cards" style="display: none;"&gt;
+    &lt;div class="card"&gt;
+        &lt;h3&gt;📊 Total NFes&lt;/h3&gt;
+        &lt;div class="card-valor" id="totalNFes"&gt;0&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="card"&gt;
+        &lt;h3&gt;📦 Total Produtos&lt;/h3&gt;
+        &lt;div class="card-valor" id="totalProdutos"&gt;0&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="card"&gt;
+        &lt;h3&gt;💰 Valor Total&lt;/h3&gt;
+        &lt;div class="card-valor" id="valorTotal"&gt;R$ 0,00&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="card"&gt;
+        &lt;h3&gt;🏛️ Total Impostos&lt;/h3&gt;
+        &lt;div class="card-valor" id="totalImpostos"&gt;R$ 0,00&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- GRÁFICOS --&gt;
+&lt;div id="graficos" class="graficos" style="display: none;"&gt;
+    &lt;div class="grafico-container"&gt;
+        &lt;h3&gt;📊 Produtos por Valor&lt;/h3&gt;
+        &lt;canvas id="graficoProdutos"&gt;&lt;/canvas&gt;
+    &lt;/div&gt;
+    &lt;div class="grafico-container"&gt;
+        &lt;h3&gt;🏛️ Distribuição de Impostos&lt;/h3&gt;
+        &lt;canvas id="graficoImpostos"&gt;&lt;/canvas&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- DETALHES COMPLETOS DAS NFES --&gt;
+&lt;div id="detalhesNFes" style="display: none;"&gt;&lt;/div&gt;
+
+&lt;!-- TABELA PRODUTOS --&gt;
+&lt;div id="resultados" style="display: none;"&gt;
+    &lt;h3&gt;📊 Todos os Produtos Extraídos&lt;/h3&gt;
+    &lt;div style="overflow-x: auto;"&gt;
+        &lt;table id="tabelaProdutos" class="tabela"&gt;
+            &lt;thead&gt;
+                &lt;tr&gt;
+                    &lt;th&gt;NFe&lt;/th&gt;
+                    &lt;th&gt;Código&lt;/th&gt;
+                    &lt;th&gt;Descrição&lt;/th&gt;
+                    &lt;th&gt;Qtd&lt;/th&gt;
+                    &lt;th&gt;Valor Unit.&lt;/th&gt;
+                    &lt;th&gt;ICMS&lt;/th&gt;
+                    &lt;th&gt;IPI&lt;/th&gt;
+                    &lt;th&gt;PIS&lt;/th&gt;
+                    &lt;th&gt;COFINS&lt;/th&gt;
+                    &lt;th&gt;Total Impostos&lt;/th&gt;
+                    &lt;th&gt;Valor Final&lt;/th&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody id="corpoTabela"&gt;&lt;/tbody&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
 </div>
 <script>
-// VARIÁVEIS GLOBAIS
-var todasNFes = [];
-var todosProdutos = [];
-var produtosFiltrados = [];
-var temaAtual = 'azul';
-// TEMAS
-var temas = {
-    azul: {
-        '--bg-color': '#e8f4fd',
-        '--primary-color': 'linear-gradient(135deg,#3498db,#2980b9)',
-        '--accent-color': '#3498db'
-    },
-    verde: {
-        '--bg-color': '#e8f5e8',
-        '--primary-color': 'linear-gradient(135deg,#27ae60,#219a52)',
-        '--accent-color': '#27ae60'
-    },
-    roxo: {
-        '--bg-color': '#f3e8ff',
-        '--primary-color': 'linear-gradient(135deg,#8e44ad,#7d3c98)',
-        '--accent-color': '#8e44ad'
-    },
-    laranja: {
-        '--bg-color': '#fef5e7',
-        '--primary-color': 'linear-gradient(135deg,#f39c12,#e67e22)',
-        '--accent-color': '#f39c12'
-    },
-    escuro: {
-        '--bg-color': '#2c3e50',
-        '--primary-color': 'linear-gradient(135deg,#34495e,#2c3e50)',
-        '--accent-color': '#3498db'
-    }
-};
-function alterarTema(tema) {
-    var root = document.documentElement;
-    var temaSelecionado = temas[tema];
-for (var propriedade in temaSelecionado) {
-    root.style.setProperty(propriedade, temaSelecionado[propriedade]);
+let todasNFes = [];
+let todosProdutos = [];
+let produtosFiltrados = [];
+// DRAG & DROP
+const uploadArea = document.getElementById('uploadArea');
+const xmlFiles = document.getElementById('xmlFiles');
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, preventDefaults, false);
+});
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
 }
-
-if (tema === 'escuro') {
-    document.body.style.color = '#ecf0f1';
-    var elementos = document.querySelectorAll('div, h1, h3, h4, p, span');
-    for (var i = 0; i &lt; elementos.length; i++) {
-        if (elementos[i].style.background === 'white' || elementos[i].style.backgroundColor === 'white') {
-            elementos[i].style.background = '#34495e';
-            elementos[i].style.color = '#ecf0f1';
-        }
-    }
-} else {
-    document.body.style.color = '';
-    var elementos = document.querySelectorAll('div, h1, h3, h4, p, span');
-    for (var i = 0; i &lt; elementos.length; i++) {
-        if (elementos[i].style.background === '#34495e') {
-            elementos[i].style.background = 'white';
-            elementos[i].style.color = '';
-        }
-    }
-}
-
-temaAtual = tema;
-
-}
-function processarMultiplosXML() {
-    var arquivos = document.getElementById('xmlFiles').files;
-    if (arquivos.length === 0) {
-        mostrarStatus('❌ Por favor, selecione pelo menos um arquivo XML', 'error');
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+});
+['dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+});
+uploadArea.addEventListener('drop', function(e) {
+    const files = e.dataTransfer.files;
+    xmlFiles.files = files;
+    processarMultiplosXML();
+});
+// PROCESSAR MÚLTIPLOS XML
+async function processarMultiplosXML() {
+    const arquivos = xmlFiles.files;
+    if (!arquivos.length) {
+        mostrarStatus('❌ Selecione pelo menos um arquivo XML', 'erro');
         return;
     }
-mostrarStatus('🔄 Processando ' + arquivos.length + ' arquivos XML...', 'info');
+mostrarStatus('🔄 Processando ' + arquivos.length + ' arquivo(s)...', 'info');
+
+const progressBar = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+progressBar.style.display = 'block';
 
 todasNFes = [];
 todosProdutos = [];
-var arquivosProcessados = 0;
 
-for (var i = 0; i &lt; arquivos.length; i++) {
-    processarArquivoXML(arquivos[i], function() {
-        arquivosProcessados++;
-        if (arquivosProcessados === arquivos.length) {
-            finalizarProcessamento();
-        }
-    });
-}
+for (let i = 0; i &lt; arquivos.length; i++) {
+    try {
+        const progresso = ((i + 1) / arquivos.length) * 100;
+        progressFill.style.width = progresso + '%';
 
-}
-function processarArquivoXML(arquivo, callback) {
-    var leitor = new FileReader();
-    leitor.onload = function(evento) {
-        try {
-            var conteudoXML = evento.target.result;
-        // LIMPAR ENTIDADES XML
-        conteudoXML = conteudoXML.replace(/&gt;/g, '&gt;');
-        conteudoXML = conteudoXML.replace(/&lt;/g, '&lt;');
-        conteudoXML = conteudoXML.replace(/&amp;/g, '&');
-        conteudoXML = conteudoXML.replace(/&quot;/g, '"');
-        conteudoXML = conteudoXML.replace(/&apos;/g, "'");
-
-        var parser = new DOMParser();
-        var documentoXML = parser.parseFromString(conteudoXML, 'text/xml');
-
-        var erroParser = documentoXML.querySelector('parsererror');
-        if (erroParser) {
-            throw new Error('XML inválido: ' + erroParser.textContent);
+        const nfe = await processarArquivo(arquivos[i]);
+        if (nfe) {
+            todasNFes.push(nfe);
+            todosProdutos = todosProdutos.concat(nfe.produtos);
         }
 
-        var dadosNFe = extrairDadosCompletos(documentoXML);
-        var produtos = extrairProdutosCompletos(documentoXML, dadosNFe.numero);
-
-        todasNFes.push(dadosNFe);
-        todosProdutos = todosProdutos.concat(produtos);
-
-        callback();
-
+        await new Promise(resolve =&gt; setTimeout(resolve, 100));
     } catch (erro) {
-        console.error('Erro ao processar arquivo:', erro);
-        callback();
+        console.error('Erro ao processar arquivo', i, ':', erro);
     }
-};
+}
 
-leitor.readAsText(arquivo, 'UTF-8');
+progressBar.style.display = 'none';
+produtosFiltrados = [...todosProdutos];
+
+if (todasNFes.length &gt; 0) {
+    exibirResultados();
+    habilitarBotoes();
+    mostrarStatus(`✅ Sucesso! ${todasNFes.length} NFe(s) processada(s) - ${todosProdutos.length} produtos extraídos`, 'sucesso');
+} else {
+    mostrarStatus('❌ Nenhuma NFe válida foi processada', 'erro');
+}
 
 }
-function extrairDadosCompletos(documentoXML) {
-    var dadosNFe = {
-        emissor: 'N/A',
-        cnpjEmissor: 'N/A',
-        enderecoEmissor: 'N/A',
-        destinatario: 'N/A',
-        cnpjDestinatario: 'N/A',
-        enderecoDestinatario: 'N/A',
-        dataEmissao: 'N/A',
-        numero: 'N/A',
-        serie: 'N/A',
-        chaveAcesso: 'N/A',
-        observacoes: 'N/A'
-    };
-try {
-    // DADOS DO EMISSOR
-    var emit = documentoXML.querySelector('emit');
-    if (emit) {
-        dadosNFe.emissor = obterTexto(emit, 'xNome') || obterTexto(emit, 'xFant') || 'N/A';
-        dadosNFe.cnpjEmissor = formatarCNPJ(obterTexto(emit, 'CNPJ')) || 'N/A';
+function processarArquivo(arquivo) {
+    return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = function(evento) {
+            try {
+                let conteudoXML = evento.target.result;
+            // Limpar entidades XML
+            conteudoXML = conteudoXML.replace(/&gt;/g, '&gt;');
+            conteudoXML = conteudoXML.replace(/&lt;/g, '&lt;');
+            conteudoXML = conteudoXML.replace(/&amp;/g, '&');
+            conteudoXML = conteudoXML.replace(/&quot;/g, '"');
+            conteudoXML = conteudoXML.replace(/&apos;/g, "'");
 
-        var enderEmit = emit.querySelector('enderEmit');
-        if (enderEmit) {
-            dadosNFe.enderecoEmissor = [
-                obterTexto(enderEmit, 'xLgr'),
-                obterTexto(enderEmit, 'nro'),
-                obterTexto(enderEmit, 'xBairro'),
-                obterTexto(enderEmit, 'xMun'),
-                obterTexto(enderEmit, 'UF'),
-                formatarCEP(obterTexto(enderEmit, 'CEP'))
-            ].filter(function(item) { return item && item !== 'N/A'; }).join(', ');
-        }
-    }
+            const parser = new DOMParser();
+            const documentoXML = parser.parseFromString(conteudoXML, 'text/xml');
 
-    // DADOS DO DESTINATÁRIO
-    var dest = documentoXML.querySelector('dest');
-    if (dest) {
-        dadosNFe.destinatario = obterTexto(dest, 'xNome') || 'N/A';
-        dadosNFe.cnpjDestinatario = formatarCNPJ(obterTexto(dest, 'CNPJ')) || formatarCPF(obterTexto(dest, 'CPF')) || 'N/A';
-
-        var enderDest = dest.querySelector('enderDest');
-        if (enderDest) {
-            dadosNFe.enderecoDestinatario = [
-                obterTexto(enderDest, 'xLgr'),
-                obterTexto(enderDest, 'nro'),
-                obterTexto(enderDest, 'xBairro'),
-                obterTexto(enderDest, 'xMun'),
-                obterTexto(enderDest, 'UF'),
-                formatarCEP(obterTexto(enderDest, 'CEP'))
-            ].filter(function(item) { return item && item !== 'N/A'; }).join(', ');
-        }
-    }
-
-    // DADOS GERAIS
-    var ide = documentoXML.querySelector('ide');
-    if (ide) {
-        var dhEmi = obterTexto(ide, 'dhEmi') || obterTexto(ide, 'dEmi');
-        if (dhEmi) {
-            if (dhEmi.indexOf('T') !== -1) {
-                var data = new Date(dhEmi);
-                dadosNFe.dataEmissao = data.toLocaleDateString('pt-BR') + ' às ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            } else {
-                dadosNFe.dataEmissao = dhEmi;
+            const erroParser = documentoXML.querySelector('parsererror');
+            if (erroParser) {
+                throw new Error('XML inválido: ' + erroParser.textContent);
             }
+
+            const nfe = extrairDadosCompletos(documentoXML, arquivo.name);
+            resolve(nfe);
+
+        } catch (erro) {
+            console.error('Erro ao processar:', erro);
+            reject(erro);
         }
+    };
+    leitor.readAsText(arquivo, 'UTF-8');
+});
 
-        dadosNFe.numero = obterTexto(ide, 'nNF') || 'N/A';
-        dadosNFe.serie = obterTexto(ide, 'serie') || 'N/A';
-    }
+}
+function extrairDadosCompletos(documentoXML, nomeArquivo) {
+    // DADOS PRINCIPAIS DA NFE
+    const ide = documentoXML.querySelector('ide');
+    const emit = documentoXML.querySelector('emit');
+    const dest = documentoXML.querySelector('dest');
+    const infProt = documentoXML.querySelector('infProt');
+const nfe = {
+    arquivo: nomeArquivo,
+    numero: obterTexto(ide, 'nNF') || 'N/A',
+    serie: obterTexto(ide, 'serie') || 'N/A',
+    dataEmissao: formatarData(obterTexto(ide, 'dhEmi') || obterTexto(ide, 'dEmi')),
+    chaveAcesso: infProt ? obterTexto(infProt, 'chNFe') || 'N/A' : 'N/A',
 
-    // CHAVE DE ACESSO
-    var infNFe = documentoXML.querySelector('infNFe');
-    if (infNFe && infNFe.getAttribute('Id')) {
-        dadosNFe.chaveAcesso = infNFe.getAttribute('Id').replace('NFe', '');
-    }
+    // EMISSOR COMPLETO
+    emissor: {
+        nome: obterTexto(emit, 'xNome') || 'N/A',
+        cnpj: obterTexto(emit, 'CNPJ') || 'N/A',
+        endereco: extrairEndereco(emit),
+        ie: obterTexto(emit, 'IE') || 'N/A'
+    },
+
+    // DESTINATÁRIO COMPLETO
+    destinatario: {
+        nome: dest ? obterTexto(dest, 'xNome') || 'N/A' : 'N/A',
+        cnpj: dest ? (obterTexto(dest, 'CNPJ') || obterTexto(dest, 'CPF') || 'N/A') : 'N/A',
+        endereco: dest ? extrairEndereco(dest) : 'N/A',
+        ie: dest ? obterTexto(dest, 'IE') || 'N/A' : 'N/A'
+    },
 
     // OBSERVAÇÕES
-    var infAdic = documentoXML.querySelector('infAdic');
-    if (infAdic) {
-        dadosNFe.observacoes = obterTexto(infAdic, 'infCpl') || 'Nenhuma observação';
-    }
+    observacoes: extrairObservacoes(documentoXML),
 
-} catch (erro) {
-    console.error('Erro ao extrair dados da NFe:', erro);
+    // PRODUTOS
+    produtos: extrairProdutosCompletos(documentoXML, nomeArquivo),
+
+    // TOTAIS
+    totais: extrairTotais(documentoXML)
+};
+
+return nfe;
+
 }
+function extrairEndereco(elemento) {
+    if (!elemento) return 'N/A';
+const enderEnder = elemento.querySelector('enderEmit, enderDest');
+if (!enderEnder) return 'N/A';
 
-return dadosNFe;
+const endereco = {
+    logradouro: obterTexto(enderEnder, 'xLgr') || '',
+    numero: obterTexto(enderEnder, 'nro') || '',
+    bairro: obterTexto(enderEnder, 'xBairro') || '',
+    cidade: obterTexto(enderEnder, 'xMun') || '',
+    uf: obterTexto(enderEnder, 'UF') || '',
+    cep: obterTexto(enderEnder, 'CEP') || ''
+};
+
+return `${endereco.logradouro}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade}/${endereco.uf} - CEP: ${endereco.cep}`;
 
 }
-function extrairProdutosCompletos(documentoXML, numeroNFe) {
-    var produtos = [];
-try {
-    var itens = documentoXML.querySelectorAll('det');
+function extrairObservacoes(documentoXML) {
+    const infAdic = documentoXML.querySelector('infAdic');
+    if (!infAdic) return 'Sem observações';
+const infCpl = obterTexto(infAdic, 'infCpl');
+const infAdFisco = obterTexto(infAdic, 'infAdFisco');
 
-    for (var i = 0; i &lt; itens.length; i++) {
-        var item = itens[i];
-        var prod = item.querySelector('prod');
+let obs = '';
+if (infCpl) obs += 'Informações Complementares: ' + infCpl;
+if (infAdFisco) obs += (obs ? ' | ' : '') + 'Informações Adicionais do Fisco: ' + infAdFisco;
 
-        if (prod) {
-            var produto = {
-                nfe: numeroNFe,
-                codigo: obterTexto(prod, 'cProd') || 'N/A',
-                descricao: obterTexto(prod, 'xProd') || 'N/A',
-                quantidade: parseFloat(obterTexto(prod, 'qCom') || '0'),
-                valorUnitarioSemImpostos: parseFloat(obterTexto(prod, 'vUnCom') || '0'),
-                valorTotalBase: parseFloat(obterTexto(prod, 'vProd') || '0'),
-                icms: 0,
-                ipi: 0,
-                pis: 0,
-                cofins: 0
-            };
+return obs || 'Sem observações';
 
-            // EXTRAIR IMPOSTOS DETALHADOS
-            var impostos = item.querySelector('imposto');
-            if (impostos) {
-                // ICMS
-                var icmsElements = impostos.querySelectorAll('[tag*="ICMS"] vICMS, [tag*="icms"] vICMS, vICMS');
-                for (var j = 0; j &lt; icmsElements.length; j++) {
-                    produto.icms += parseFloat(icmsElements[j].textContent || '0');
-                }
+}
+function extrairProdutosCompletos(documentoXML, nomeArquivo) {
+    const produtos = [];
+    const itens = documentoXML.querySelectorAll('det');
+for (let i = 0; i &lt; itens.length; i++) {
+    const item = itens[i];
+    const prod = item.querySelector('prod');
 
-                // IPI
-                var ipiElements = impostos.querySelectorAll('vIPI');
-                for (var k = 0; k &lt; ipiElements.length; k++) {
-                    produto.ipi += parseFloat(ipiElements[k].textContent || '0');
-                }
+    if (prod) {
+        const impostos = extrairImpostosDetalhados(item);
 
-                // PIS
-                var pisElements = impostos.querySelectorAll('vPIS');
-                for (var l = 0; l &lt; pisElements.length; l++) {
-                    produto.pis += parseFloat(pisElements[l].textContent || '0');
-                }
+        const produto = {
+            nfe: nomeArquivo,
+            codigo: obterTexto(prod, 'cProd') || 'N/A',
+            descricao: obterTexto(prod, 'xProd') || 'N/A',
+            quantidade: parseFloat(obterTexto(prod, 'qCom') || '0'),
+            valorUnitario: parseFloat(obterTexto(prod, 'vUnCom') || '0'),
+            valorTotal: parseFloat(obterTexto(prod, 'vProd') || '0'),
 
-                // COFINS
-                var cofinsElements = impostos.querySelectorAll('vCOFINS');
-                for (var m = 0; m &lt; cofinsElements.length; m++) {
-                    produto.cofins += parseFloat(cofinsElements[m].textContent || '0');
-                }
-            }
+            // IMPOSTOS DETALHADOS
+            icms: impostos.icms,
+            ipi: impostos.ipi,
+            pis: impostos.pis,
+            cofins: impostos.cofins,
+            totalImpostos: impostos.total,
 
-            produto.totalImpostos = produto.icms + produto.ipi + produto.pis + produto.cofins;
-            produto.valorTotalComImpostos = produto.valorTotalBase + produto.totalImpostos;
-            produto.valorUnitarioComImpostos = produto.quantidade &gt; 0 ? produto.valorTotalComImpostos / produto.quantidade : 0;
+            valorFinal: parseFloat(obterTexto(prod, 'vProd') || '0') + impostos.total
+        };
 
-            produtos.push(produto);
-        }
+        produtos.push(produto);
     }
-} catch (erro) {
-    console.error('Erro ao extrair produtos:', erro);
 }
 
 return produtos;
 
 }
-function finalizarProcessamento() {
-    if (todasNFes.length === 0) {
-        mostrarStatus('❌ Nenhuma NFe foi processada com sucesso', 'error');
-        return;
-    }
-produtosFiltrados = todosProdutos.slice();
+function extrairImpostosDetalhados(item) {
+    const impostos = {
+        icms: 0,
+        ipi: 0,
+        pis: 0,
+        cofins: 0,
+        total: 0
+    };
+const imposto = item.querySelector('imposto');
+if (!imposto) return impostos;
 
-preencherInformacoesCompletas();
-exibirResumoG
+// ICMS
+const icmsElements = imposto.querySelectorAll('vICMS, vBCSTRet, vICMSST');
+icmsElements.forEach(el =&gt; {
+    impostos.icms += parseFloat(el.textContent || '0');
+});
+
+// IPI
+const ipiElement = imposto.querySelector('vIPI');
+if (ipiElement) {
+    impostos.ipi = parseFloat(ipiElement.textContent || '0');
+}
+
+// PIS
+const pisElement = imposto.querySelector('vPIS');
+if (pisElement) {
+    impostos.pis = parseFloat(pisElement.textContent || '0');
+}
+
+// COFINS
+const cofinsElement = imposto.querySelector('vCOFINS');
+if (cofinsElement) {
+    impostos.cofins = parseFloat(cofinsElement.textContent || '0');
+}
+
+impostos.total = impostos.icms + impostos.ipi + impostos.pis + impostos.cofins;
+
+return impostos;
+
+}
+function extrairTotais(documentoXML) {
+    const total = documentoXML.querySelector('total ICMSTot');
+return {
+    baseCalculoICMS: parseFloat(obterTexto(total, 'vBC') || '0'),
+    valorICMS: parseFloat(obterTexto(total, 'vICMS') || '0'),
+    valorTotalProdutos: parseFloat(obterTexto(total, 'vProd') || '0'),
+    valorTotalNF: parseFloat(obterTexto(total, 'vNF') || '0')
+};
+
+}
+function formatarData(data) {
+    if (!data) return 'N/A';
+try {
+    if (data.indexOf('T') !== -1) {
+        const dataObj = new Date(data);
+        return dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+    }
+    return data.substring(0, 10).split('-').reverse().join('/');
+} catch (e) {
+    return data;
+}
+
+}
+function obterTexto(elemento, tag) {
+    if (!elemento) return '';
+    const el = elemento.querySelector(tag);
+    return el ? el.textContent.trim() : '';
+}
+function exibirResultados() {
+    // CARDS RESUMO
+    const totalNFes = todasNFes.length;
+    const totalProdutos = todosProdutos.length;
+    const valorTotal = todosProdutos.reduce((sum, p) => sum + p.valorFinal, 0);
+    const totalImpostos = todosProdutos.reduce((sum, p) => sum + p.totalImpostos, 0);
+document.getElementById('totalNFes').textContent = totalNFes;
+document.getElementById('totalProdutos').textContent = totalProdutos;
+document.getElementById('valorTotal').textContent = formatarMoeda(valorTotal);
+document.getElementById('totalImpostos').textContent = formatarMoeda(totalImpostos);
+
+document.getElementById('cards').style.display = 'grid';
+
+// DETALHES DAS NFES
+exibirDetalhesNFes();
+
+// TABELA PRODUTOS
+exibirTabelaProdutos();
+
+// GRÁFICOS
+criarGraficos();
+
+document.getElementById('resultados').style.display = 'block';
+document.getElementById('graficos').style.display = 'grid';
+
+}
+function exibirDetalhesNFes() {
+    const container = document.getElementById('detalhesNFes');
+    container.innerHTML = '<h3>📋 Detalhes Completos das NFes</h3>';
+todasNFes.forEach(nfe =&gt; {
+    const div = document.createElement('div');
+    div.className = 'detalhes-nfe';
+    div.innerHTML = `
+        &lt;div&gt;
+            &lt;h4&gt;📄 NFe ${nfe.numero} - Série ${nfe.serie}&lt;/h4&gt;
+            &lt;p&gt;&lt;strong&gt;📅 Data:&lt;/strong&gt; ${nfe.dataEmissao}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;🔢 Chave:&lt;/strong&gt; ${nfe.chaveAcesso}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;📁 Arquivo:&lt;/strong&gt; ${nfe.arquivo}&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+            &lt;h5&gt;🏢 Emissor&lt;/h5&gt;
+            &lt;p&gt;&lt;strong&gt;Nome:&lt;/strong&gt; ${nfe.emissor.nome}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;CNPJ:&lt;/strong&gt; ${nfe.emissor.cnpj}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;IE:&lt;/strong&gt; ${nfe.emissor.ie}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Endereço:&lt;/strong&gt; ${nfe.emissor.endereco}&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+            &lt;h5&gt;🏪 Destinatário&lt;/h5&gt;
+            &lt;p&gt;&lt;strong&gt;Nome:&lt;/strong&gt; ${nfe.destinatario.nome}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;CNPJ/CPF:&lt;/strong&gt; ${nfe.destinatario.cnpj}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;IE:&lt;/strong&gt; ${nfe.destinatario.ie}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Endereço:&lt;/strong&gt; ${nfe.destinatario.endereco}&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+            &lt;h5&gt;📋 Observações&lt;/h5&gt;
+            &lt;p&gt;${nfe.observacoes}&lt;/p&gt;
+        &lt;/div&gt;
+    `;
+    container.appendChild(div);
+});
+
+container.style.display = 'block';
+
+}
